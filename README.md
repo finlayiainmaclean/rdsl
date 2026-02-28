@@ -3,8 +3,7 @@
 `rdsl` is a domain-specific language (DSL) for selecting atoms and extracting sub-molecules from RDKit molecules. Heavily inspired by PyMOL's selection syntax, `rdsl` brings expressive, natural-language-like queries to the RDKit ecosystem.
 
 ```python
-atom_ids = select_atom_ids(mol, "donors and ringsize 5")
-mol
+select_atom_ids(mol, "donors and ringsize 5")
 ```
 <img src="image.png" width="400" alt="Selection example">
 
@@ -76,6 +75,8 @@ from rdsl import get_functional_group_matches
 df = get_functional_group_matches(mol)
 print(df[["name", "atom_ids", "group"]])
 ```
+
+For an online web server from the original authors, see [SmartChemist](https://chemist.smarts.plus/).
 
 ## Syntax Guide
 
