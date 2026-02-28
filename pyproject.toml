@@ -1,7 +1,7 @@
 [project]
 name = "rdsl"
 version = "0.0.1"
-description = "This is a template repository for Python projects that use uv for their dependency management."
+description = "A powerful Domain Specific Language (DSL) for expressive molecule selection and extraction in RDKit."
 authors = [{ name = "Finlay MacLean", email = "finlayiainmaclean@gmail.com" }]
 readme = "README.md"
 keywords = ['python']

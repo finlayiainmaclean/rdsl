@@ -1,74 +1,99 @@
-# rdsl
+# RDSL: RDKit Domain Specific Language
 
-[![Release](https://img.shields.io/github/v/release/finlayiainmaclean/rdsl)](https://img.shields.io/github/v/release/finlayiainmaclean/rdsl)
-[![Build status](https://img.shields.io/github/actions/workflow/status/finlayiainmaclean/rdsl/main.yml?branch=main)](https://github.com/finlayiainmaclean/rdsl/actions/workflows/main.yml?query=branch%3Amain)
-[![codecov](https://codecov.io/gh/finlayiainmaclean/rdsl/branch/main/graph/badge.svg)](https://codecov.io/gh/finlayiainmaclean/rdsl)
-[![Commit activity](https://img.shields.io/github/commit-activity/m/finlayiainmaclean/rdsl)](https://img.shields.io/github/commit-activity/m/finlayiainmaclean/rdsl)
-[![License](https://img.shields.io/github/license/finlayiainmaclean/rdsl)](https://img.shields.io/github/license/finlayiainmaclean/rdsl)
+`rdsl` is a powerful and intuitive domain-specific language (DSL) for selecting atoms and extracting sub-molecules from RDKit molecules. Heavily inspired by PyMOL's selection syntax, `rdsl` brings expressive, natural-language-like queries to the RDKit ecosystem.
 
-This is a template repository for Python projects that use uv for their dependency management.
+## Features
 
-- **Github repository**: <https://github.com/finlayiainmaclean/rdsl/>
-- **Documentation** <https://finlayiainmaclean.github.io/rdsl/>
+- **Expressive Selection Syntax**: Use logic (`and`, `or`, `not`), topological relationships, and geometric constraints.
+- **Sub-molecule Extraction**: Easily extract subsets of molecules with configurable handling of broken bonds (hydrogens, radicals, or wildcards).
+- **Hierarchical Functional Groups**: Built-in detection of hundreds of functional groups with smart overshadowing logic (e.g., identifies "toluene" without redundantly tagging the "benzene" core).
+- **PDB Support**: Support for PDB-specific selection attributes like `resi`, `resn`, `chain`, and `alt`.
+- **Property Queries**: Select atoms based on formal charge, partial charge, mass, valence, and more.
 
-## Getting started with your project
-
-### 1. Create a New Repository
-
-First, create a repository on GitHub with the same name as this project, and then run the following commands:
+## Installation
 
 ```bash
-git init -b main
-git add .
-git commit -m "init commit"
-git remote add origin git@github.com:finlayiainmaclean/rdsl.git
-git push -u origin main
+pip install rdsl
 ```
 
-### 2. Set Up Your Development Environment
+## Usage
 
-Then, install the environment and the pre-commit hooks with
+### Atom Selection
 
-```bash
-make install
+The `select_atom_ids` function returns a numpy array of indices for atoms matching the expression.
+
+```python
+from rdkit import Chem
+from rdsl import select_atom_ids
+
+mol = Chem.MolFromSmiles("Cc1ccccc1O")
+
+# Simple keyword selections
+aromatic_atoms = select_atom_ids(mol, "aromatic")
+
+# Complex logical expressions
+carbon_rings = select_atom_ids(mol, "elem C and ring")
+
+# Geometric and distance-based queries
+near_oxygen = select_atom_ids(mol, "all within 3.0 of elem O")
+
+# Custom SMARTS matching
+benzene_matches = select_atom_ids(mol, 'smarts "c1ccccc1"')
 ```
 
-This will also generate your `uv.lock` file
+### Molecule Extraction
 
-### 3. Run the pre-commit hooks
+The `select_molecule` function extracts the selected atoms into a new Molecule object.
 
-Initially, the CI/CD pipeline might be failing due to formatting issues. To resolve those run:
+```python
+from rdsl import select_molecule
 
-```bash
-uv run pre-commit run -a
+# Extract the benzene ring, automatically capping broken bonds with hydrogens
+result = select_molecule(mol, "aromatic")
+submol = result.mol
+
+# Track where atoms came from
+original_idx = result.atom_mapping[0]
+
+# Handle broken bonds with wildcards (useful for fragments)
+result = select_molecule(mol, "aromatic", broken_bonds="wildcards")
 ```
 
-### 4. Commit the changes
+### Functional Group Detection
 
-Lastly, commit the changes made by the two steps above to your repository.
+Identify functional groups with built-in patterns that respect chemical hierarchies.
 
-```bash
-git add .
-git commit -m 'Fix formatting issues'
-git push origin main
+```python
+from rdsl import get_functional_group_matches
+
+# Returns a pandas DataFrame with identified groups
+df = get_functional_group_matches(mol)
+print(df[["name", "atom_ids", "group"]])
 ```
 
-You are now ready to start development on your project!
-The CI/CD pipeline will be triggered when you open a pull request, merge to main, or when you create a new release.
+## Syntax Guide
 
-To finalize the set-up for publishing to PyPI, see [here](https://fpgmaas.github.io/cookiecutter-uv/features/publishing/#set-up-for-pypi).
-For activating the automatic documentation with MkDocs, see [here](https://fpgmaas.github.io/cookiecutter-uv/features/mkdocs/#enabling-the-documentation-on-github).
-To enable the code coverage reports, see [here](https://fpgmaas.github.io/cookiecutter-uv/features/codecov/).
+`rdsl` supports a wide range of operators. See [examples.ipynb](examples.ipynb) for a comprehensive list of selection functionality and examples. A non-exhaustive list of operators is shown below:
 
-## Releasing a new version
+| Category | Operators / Keywords |
+| :--- | :--- |
+| **Logic** | `and`, `or`, `not`, `( )` |
+| **Flags** | `aromatic`, `aliphatic`, `ring`, `donor`, `acceptor`, `hydrophobic`, `alerts` |
+| **Attributes** | `elem`, `atomic_number`, `formal_charge`, `index`, `mass` |
+| **PDB** | `resi`, `resn`, `chain`, `name`, `id` |
+| **Topology** | `neighbor`, `ringsize`, `bound_to`, `bymolecule`, `byring` |
+| **Geometry** | `within <dist> of <expr>`, `beyond <dist> of <expr>`, `around <dist>` |
+| **Chemical** | `smarts "<pattern>"`, `functional "<name>"` |
+| **Index** | `first`, `last`, `index 0-5+10` |
+| **Neighbors** | `neighbor <expr>`, `bound_to <expr>` |
 
-- Create an API Token on [PyPI](https://pypi.org/).
-- Add the API Token to your projects secrets with the name `PYPI_TOKEN` by visiting [this page](https://github.com/finlayiainmaclean/rdsl/settings/secrets/actions/new).
-- Create a [new release](https://github.com/finlayiainmaclean/rdsl/releases/new) on Github.
-- Create a new tag in the form `*.*.*`.
 
-For more details, see [here](https://fpgmaas.github.io/cookiecutter-uv/features/cicd/#how-to-trigger-a-release).
+## Acknowledgements
 
----
+- **Functional Groups**: The SMARTS patterns used for functional group detection are taken from [SmartChemist](https://github.com/torbengutermuth/SmartChemist) by Torben Gutermuth. NB: Make sure to cite SmartChemist in any publications that use this functionality, and do not modify the SMARTS patterns in a way that violates the license.
+- **Selection Parser**: The core DSL parser architecture is a port of the `pyparser` implementation found in [mdtop](https://github.com/SimonBoothroyd/mdtop/blob/main/mdtop/_sel.py), originally inspired by PyMOL.
+- **Inspiration**: This project was inspired by Alex Binnie, who developed a similar DSL for OpenEye toolkit.
 
-Repository initiated with [fpgmaas/cookiecutter-uv](https://github.com/fpgmaas/cookiecutter-uv).
+## License
+
+MIT

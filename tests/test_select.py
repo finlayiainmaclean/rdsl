@@ -207,7 +207,7 @@ def test_select_gap():
 def pdb_mol():
     """Fixture to load 7rpz.pdb."""
     pdb_path = Path(__file__).parent / "data" / "7rpz.pdb"
-    mol = AllChem.MolFromPDBFile(str(pdb_path), removeHs=False)
+    mol = Chem.MolFromPDBFile(str(pdb_path), removeHs=False)
     assert mol is not None
     return mol
 
