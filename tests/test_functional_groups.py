@@ -11,7 +11,11 @@ def test_basic_functional_groups():
     assert isinstance(df, pd.DataFrame)
     assert "ethoxy" in df["name"].values
     row = df[df["name"] == "ethoxy"].iloc[0]
-    assert row["atom_ids"] == (0,1,2,)
+    assert row["atom_ids"] == (
+        0,
+        1,
+        2,
+    )
 
 
 def test_benzene_highlighting():
@@ -42,7 +46,6 @@ def test_include_overshadowed_toluene():
     assert "toluene" in names
     assert "benzene" in names
     assert "methyl" in names
-
 
 
 def test_empty_mol():
