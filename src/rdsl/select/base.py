@@ -55,62 +55,64 @@ _FEATURE_FLAG_OPS = [(name, []) for name in _FEATURE_MAP]
 _FLAG_OPS = [
     ("all", ["*"]),
     ("none", []),
-    ("aromatic", ["ar."]),
-    ("aliphatic", ["ali."]),
-    ("hetatm", ["het."]),
+    ("aromatic", []),
+    ("aliphatic", []),
+    ("hetatm", []),
     ("hydrogens", ["h."]),
-    ("heavy", ["hvy."]),
+    ("heavy", []),
     ("ring", []),
     ("sidechain", ["sc."]),
     ("backbone", ["bb."]),
     ("solvent", ["sol."]),
-    ("metals", ["met."]),
+    ("metals", []),
     ("polymer", ["pol."]),
-    ("protein", ["pro."]),
-    ("nucleic", ["nuc."]),
-    ("inorganic", ["inorg."]),
+    ("protein", []),
+    ("nucleic", []),
+    ("inorganic", ["ino."]),
     ("organic", ["org."]),
-    ("artifact", ["art."]),
+    ("artifact", []),
+    ("donors", ["don."]),
+    ("acceptors", ["acc."]),
     *_SMARTS_FLAG_OPS,
-    *_FEATURE_FLAG_OPS,
+    *[(name, []) for name in _FEATURE_MAP if name not in ("donors", "acceptors")],
 ]
 
 _ATTR_OPS = [
     ("elem", ["e."], _IDENTIFIER),
-    ("atomic_number", ["an."], _INTEGER),
-    ("isotope", ["iso."], _INTEGER),
-    ("atom_map_number", ["am."], _INTEGER),
-    ("mass", ["m."], _DECIMAL),
-    ("explicit_valence", ["ev."], _DECIMAL),
-    ("implicit_valence", ["iv."], _DECIMAL),
-    ("valence", ["v."], _DECIMAL),
+    ("atomic_number", [], _INTEGER),
+    ("isotope", [], _INTEGER),
+    ("atom_map_number", [], _INTEGER),
+    ("mass", [], _DECIMAL),
+    ("explicit_valence", [], _DECIMAL),
+    ("implicit_valence", [], _DECIMAL),
+    ("valence", [], _DECIMAL),
     ("index", ["idx."], _INTEGER),
-    ("degree", ["deg."], _INTEGER),
-    ("formal_charge", ["fchg."], _INTEGER),
-    ("partial_charge", ["pchg."], _DECIMAL),
-    ("radical_electrons", ["re."], _INTEGER),
-    ("chirality", ["ch.", "stereo"], _IDENTIFIER),
-    ("hybridization", ["hyb."], _IDENTIFIER),
+    ("degree", [], _INTEGER),
+    ("formal_charge", ["fc."], _INTEGER),
+    ("partial_charge", ["pc."], _DECIMAL),
+    ("radical_electrons", [], _INTEGER),
+    ("stereo", [], _IDENTIFIER),
+    ("hybridization", [], _IDENTIFIER),
 ]
 
 _PDB_OPS = [
-    ("chain", ["ch."], _IDENTIFIER),
-    ("resn", ["rn."], _IDENTIFIER),
-    ("resi", ["ri."], _IDENTIFIER),
-    ("resv", ["rv."], _INTEGER),
-    ("name", ["na."], _IDENTIFIER),
-    ("alt", ["al."], _IDENTIFIER),
-    ("b", ["b."], _DECIMAL),
-    ("q", ["q."], _DECIMAL),
-    ("id", ["id."], _INTEGER),
+    ("chain", ["c."], _IDENTIFIER),
+    ("resn", ["r."], _IDENTIFIER),
+    ("resi", ["i."], _IDENTIFIER),
+    ("resv", [], _INTEGER),
+    ("name", ["n."], _IDENTIFIER),
+    ("alt", [], _IDENTIFIER),
+    ("b", [], _DECIMAL),
+    ("q", [], _DECIMAL),
+    ("id", [], _INTEGER),
 ]
 _ATTR_OPS += _PDB_OPS
 
-_SMARTS_OP = [("smarts", ["sm."])]
-_FUNCTIONAL_OP = [("functional", ["fg."])]
+_SMARTS_OP = [("smarts", [])]
+_FUNCTIONAL_OP = [("functional", [])]
 _RING_OPS = [
-    ("inring", ["ir."]),
-    ("ringsize", ["rs."]),
+    ("inring", []),
+    ("ringsize", []),
 ]
 _DIST_OPS = [
     ("within", ["w."]),
@@ -120,20 +122,21 @@ _UNARY_OPS = [("not", ["!"])]
 _BINARY_OPS = [("and", ["&"]), ("or", ["|"])]
 _SUBSET_OPS = [("in", ["in"])]
 _EXPANSION_OPS = [
-    ("bymolecule", ["bymol.", "bm."]),
-    ("bychain", ["bychain.", "bc."]),
-    ("byres", ["byres.", "br.", "byresidue", "byresidue."]),
-    ("byring", ["bring.", "byr."]),
-    ("byfunctional", ["byfg.", "bfg."]),
+    ("bymolecule", ["bm."]),
+    ("bychain", ["bc."]),
+    ("byres", ["br."]),
+    ("byring", []),
+    ("byfunctional", []),
 ]
 _FIRSTLAST_OPS = [
-    ("first", ["f."]),
-    ("last", ["l."]),
+    ("first", []),
+    ("last", []),
 ]
-_BOND_OPS = [("bound_to", ["bt.", "bonded_to"])]
-_NEIGHBOR_OPS = [("neighbor", ["nb."])]
+_BOND_OPS = [("bound_to", ["bto."])]
+_NEIGHBOR_OPS = [("neighbor", ["nbr."])]
 _AROUND_OPS = [("around", ["a."])]
-_GAP_OPS = [("gap", ["g."])]
+_GAP_OPS = [("gap", [])]
+_EXTEND_OPS = [("extend", ["xt."])]
 
 _ALL_OPS = (
     _FLAG_OPS
@@ -151,6 +154,7 @@ _ALL_OPS = (
     + _NEIGHBOR_OPS
     + _AROUND_OPS
     + _GAP_OPS
+    + _EXTEND_OPS
 )
 
 

@@ -18,6 +18,7 @@ from rdsl.select.base import (
     _DECIMAL,
     _DIST_OPS,
     _EXPANSION_OPS,
+    _EXTEND_OPS,
     _FIRSTLAST_OPS,
     _FLAG_OPS,
     _FUNCTIONAL_OP,
@@ -95,7 +96,7 @@ def _create_parser():
 
     _EXTEND_N = Regex(r"\d+").set_parse_action(lambda t: int(t[0]))
     extend_ops = [
-        (CaselessKeyword("extend") + _EXTEND_N, 1, OpAssoc.LEFT, ExtendOp),
+        (CaselessKeyword(kw) + _EXTEND_N, 1, OpAssoc.LEFT, ExtendOp) for op in _EXTEND_OPS for kw in _flatten(op)
     ]
     extend_ops += [
         (CaselessKeyword(kw), 1, OpAssoc.RIGHT, ExtendOp) for op in (_BOND_OPS + _NEIGHBOR_OPS) for kw in _flatten(op)

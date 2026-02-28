@@ -377,7 +377,7 @@ class ExpandOp(BaseOp):
 
     def apply(self, mol: Chem.Mol, ctx: pd.DataFrame) -> np.ndarray:
         rhs = self.rhs.apply(mol, ctx)
-        if self.op.lower() in {"bymolecule", "bymol", "bm"}:
+        if self.op.lower() == "bymolecule":
             frags = Chem.GetMolFrags(mol, asMols=False)
             selected_frags = set()
             for frag_idx, frag_atoms in enumerate(frags):
@@ -388,13 +388,13 @@ class ExpandOp(BaseOp):
                 for atom_idx in frags[frag_idx]:
                     result[atom_idx] = True
             return result
-        if self.op.lower() in {"bychain", "bc"}:
+        if self.op.lower() == "bychain":
             selected_chains = set(ctx.loc[rhs, "chain"].dropna().unique())
             return ctx["chain"].isin(selected_chains).values
-        if self.op.lower() in {"byres", "br"}:
+        if self.op.lower() == "byres":
             selected_residues = set(ctx.loc[rhs, "residue"].dropna().unique())
             return ctx["residue"].isin(selected_residues).values
-        if self.op.lower() in {"byring", "bring", "byr"}:
+        if self.op.lower() == "byring":
             ri = mol.GetRingInfo()
             atom_rings = ri.AtomRings()
             selected_indices = np.where(rhs)[0]
@@ -420,7 +420,7 @@ class ExpandOp(BaseOp):
                 for atom_idx in atom_rings[ring_idx]:
                     result[atom_idx] = True
             return result
-        if self.op.lower() in {"byfunctional", "byfg", "bfg"}:
+        if self.op.lower() == "byfunctional":
             matches_df = get_functional_group_matches(mol, include_overshadowed=True)
             if matches_df.empty:
                 return np.zeros(len(ctx), dtype=bool)

@@ -259,7 +259,7 @@ def _create_context(mol: Chem.Mol) -> pd.DataFrame:
             "partial_charge": (atom.GetDoubleProp("_GasteigerCharge") if atom.HasProp("_GasteigerCharge") else None),
             "radical_electrons": atom.GetNumRadicalElectrons(),
             "hybridization": str(atom.GetHybridization()),
-            "chirality": atom.GetProp("_CIPCode") if atom.HasProp("_CIPCode") else "",
+            "stereo": atom.GetProp("_CIPCode") if atom.HasProp("_CIPCode") else "",
             "chain": residue_info.GetChainId() if residue_info else None,
             "residue": (
                 f"{residue_info.GetChainId()}:{residue_info.GetResidueNumber()}{residue_info.GetInsertionCode().strip()}"

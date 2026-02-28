@@ -85,9 +85,9 @@ from rdsl.select.consts import SIDECHAIN_ATOMS
         ("NC(=O)Cc1ccccc1", "elem N extend 1", [0, 1]),
         ("NC(=O)Cc1ccccc1", "elem N extend 2", [0, 1, 2, 3]),
         ("NC(=O)Cc1ccccc1", "bound_to elem N", [0, 1]),
-        ("NC(=O)Cc1ccccc1", "bt. elem N", [0, 1]),
+        ("NC(=O)Cc1ccccc1", "bto. elem N", [0, 1]),
         ("NC(=O)Cc1ccccc1", "neighbor elem N", [1]),
-        ("NC(=O)Cc1ccccc1", "nb. elem N", [1]),
+        ("NC(=O)Cc1ccccc1", "nbr. elem N", [1]),
         # First / last
         ("NC(=O)Cc1ccccc1", "first elem C", [1]),
         ("NC(=O)Cc1ccccc1", "last elem C", [9]),
@@ -345,5 +345,5 @@ def test_select_pdb_expansion(pdb_mol):
     assert len(f_atoms) > 0
     assert len(non_f_atoms) > 0
 
-    submol_f_alias = select_molecule(pdb_mol, "byresidue elem F").mol
+    submol_f_alias = select_molecule(pdb_mol, "br. elem F").mol
     assert submol_f_alias.GetNumAtoms() == submol_f.GetNumAtoms()
