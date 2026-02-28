@@ -1,6 +1,6 @@
 # RDSL: RDKit Domain Specific Language
 
-`rdsl` is a powerful and intuitive domain-specific language (DSL) for selecting atoms and extracting sub-molecules from RDKit molecules. Heavily inspired by PyMOL's selection syntax, `rdsl` brings expressive, natural-language-like queries to the RDKit ecosystem.
+`rdsl` is a domain-specific language (DSL) for selecting atoms and extracting sub-molecules from RDKit molecules. Heavily inspired by PyMOL's selection syntax, `rdsl` brings expressive, natural-language-like queries to the RDKit ecosystem.
 
 ```python
 atom_ids = select_atom_ids(mol, "donors and ringsize 5")
