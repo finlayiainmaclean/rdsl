@@ -1,19 +1,6 @@
 # RDSL: RDKit Domain Specific Language
 
-`rdsl` is a domain-specific language (DSL) for selecting atoms and extracting sub-molecules from RDKit molecules. Heavily inspired by PyMOL's selection syntax, `rdsl` brings expressive, natural-language-like queries to the RDKit ecosystem.
-
-```python
-select_atom_ids(mol, "donors and ringsize 5")
-```
-<img src="image.png" width="400" alt="Selection example">
-
-## Features
-
-- **Expressive Selection Syntax**: Use logic (`and`, `or`, `not`), topological relationships, and geometric constraints.
-- **Sub-molecule Extraction**: Easily extract subsets of molecules with configurable handling of broken bonds (hydrogens, radicals, or wildcards).
-- **Hierarchical Functional Groups**: Built-in detection of hundreds of functional groups with smart overshadowing logic (e.g., identifies "toluene" without redundantly tagging the "benzene" core).
-- **PDB Support**: Support for PDB-specific selection attributes like `resi`, `resn`, `chain`, and `alt`.
-- **Property Queries**: Select atoms based on formal charge, partial charge, mass, valence, and more.
+`rdsl` is a domain-specific language (DSL) for selecting atoms and extracting sub-molecules from RDKit molecules. Heavily inspired by PyMOL's selection syntax.
 
 ## Installation
 
@@ -85,16 +72,18 @@ For an online web server from the original authors, see [SmartChemist](https://c
 | Category | Operators / Keywords |
 | :--- | :--- |
 | **Logic** | `and`, `or`, `not`, `( )` |
-| **Flags** | `aromatic`, `aliphatic`, `ring`, `donor`, `acceptor`, `hydrophobic`, `alerts` |
-| **Attributes** | `elem`, `atomic_number`, `formal_charge`, `index`, `mass` |
-| **PDB** | `resi`, `resn`, `chain`, `name`, `id` |
-| **Topology** | `neighbor`, `ringsize`, `bound_to`, `bymolecule`, `byring` |
-| **Geometry** | `within <dist> of <expr>`, `beyond <dist> of <expr>`, `around <dist>` |
-| **Chemical** | `smarts "<pattern>"`, `functional "<name>"` |
-| **Index** | `first`, `last`, `index 0-5+10` |
-| **Neighbors** | `neighbor <expr>`, `bound_to <expr>` |
-
-
+| **Selection** | `first`, `last`, `in` |
+| **Basic Flags** | `all`, `none`, `heavy`, `hydrogens`|
+| **Atom Attributes** | `elem`, `atomic_number`, `isotope`, `mass`, `index`, `formal_charge`, `partial_charge`, `valence`, `degree`, `hybridization`, `chirality`, `ring`, `aromatic`, `aliphatic` |
+| **Pharmacophore**| `donors`, `acceptors`, `hydrophobes`, `pos_ionizable`, `neg_ionizable`, `zn_binders` |
+| **MedChem Alerts** | `alerts` |
+| **Functional Groups** | `functional "<name>"` |
+| **Custom SMARTS** | `smarts "<pattern>"` |
+| **Topology** | `neighbor`, `bound_to`, `ringsize`, `inring` |
+| **Expansions** | `bymolecule`, `byring`, `byres`, `bychain`, `byfunctional` |
+| **Proximity** | `within <dist> of <expr>`, `beyond <dist> of <expr>`, `around <dist>`, `gap <dist> of <expr>` |
+| **PDB** | `resi`, `resn`, `resv`, `chain`, `name`, `alt`, `id`, `b`, `q`, `hetatm`|
+| **PDB Classification** | `sidechain`, `backbone`,`protein`, `nucleic`, `polymer`, `solvent`, `metals`, `organic`, `inorganic`, `artifact` |
 
 ## Acknowledgements
 
