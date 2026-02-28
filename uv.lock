@@ -2449,7 +2449,6 @@ dev = [
 requires-dist = [
     { name = "loguru", specifier = ">=0.7.3" },
     { name = "numpy", specifier = ">=1.26.0" },
-    { name = "pandas", specifier = ">=2.2.0" },
     { name = "pandas", specifier = ">=2.3.3" },
     { name = "pyparsing", specifier = ">=3.1.0" },
     { name = "rdkit", specifier = ">=2025.9.4" },

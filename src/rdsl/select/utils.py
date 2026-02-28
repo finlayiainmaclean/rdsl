@@ -99,9 +99,7 @@ def _get_inorganic_atoms(mol: Chem.Mol) -> np.ndarray:
 
         # If it's a mixed fragment (inorganic residues + carbon/protein/etc.),
         # only mark the specific inorganic residues.
-        if (resnames & _INORGANIC_RESIDUES) and (
-            has_carbon or (resnames - _INORGANIC_RESIDUES - _WATER_RESIDUES)
-        ):
+        if (resnames & _INORGANIC_RESIDUES) and (has_carbon or (resnames - _INORGANIC_RESIDUES - _WATER_RESIDUES)):
             for i in frag_atoms:
                 atom = mol.GetAtomWithIdx(int(i))
                 info = atom.GetPDBResidueInfo()
@@ -141,9 +139,7 @@ def _get_organic_atoms(mol: Chem.Mol, inorganic_mask: np.ndarray) -> np.ndarray:
 
         # If it's a mixed fragment (bonded to protein/nucleic/inorganic),
         # only mark atoms that don't belong to those other categories.
-        other_categories = (
-            _PROTEIN_RESIDUES | _NUCLEIC_ACID_RESIDUES | _WATER_RESIDUES | _ARTIFACT_RESIDUES
-        )
+        other_categories = _PROTEIN_RESIDUES | _NUCLEIC_ACID_RESIDUES | _WATER_RESIDUES | _ARTIFACT_RESIDUES
         if resnames & other_categories:
             for i in frag_atoms:
                 if inorganic_mask[int(i)]:

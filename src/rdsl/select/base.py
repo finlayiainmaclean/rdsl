@@ -6,7 +6,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from pyparsing import DelimitedList, MatchFirst, ParserElement, QuotedString, Regex, Word, alphanums
+from pyparsing import DelimitedList, ParserElement, QuotedString, Regex, Word, alphanums
 from rdkit import Chem, RDConfig
 from rdkit.Chem import AllChem
 
@@ -41,7 +41,9 @@ def _parse_range(tokens) -> list[int]:
 
 
 _INTEGER = DelimitedList(Regex(r"\d+(-\d+)?").set_parse_action(_parse_range), delim="+")
-_IDENTIFIER_BASE = Word(alphanums, alphanums + "*") | QuotedString('"', unquote_results=True) | QuotedString("'", unquote_results=True)
+_IDENTIFIER_BASE = (
+    Word(alphanums, alphanums + "*") | QuotedString('"', unquote_results=True) | QuotedString("'", unquote_results=True)
+)
 _IDENTIFIER = DelimitedList(_IDENTIFIER_BASE, delim="+")
 _DECIMAL_REGEX = r"[+-]?\d*\.?\d*"
 _DECIMAL = Regex(_DECIMAL_REGEX).set_parse_action(lambda t: float(t[0]))

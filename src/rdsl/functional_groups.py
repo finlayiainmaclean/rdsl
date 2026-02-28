@@ -1,11 +1,10 @@
 import ast
 from pathlib import Path
-from typing import Dict, List, Set, Tuple
 
 import pandas as pd
 from rdkit import Chem
 
-# WARNING: These SMARTS patterns are taken from 
+# WARNING: These SMARTS patterns are taken from
 # https://github.com/torbengutermuth/SmartChemist/blob/main/smarts/License_for_patterns_here
 # These patterns have aCreative Commons Attribution-NoDerivatives 4.0 International Public License
 # If you use these patterns in your own code, remember to credit them!
@@ -35,12 +34,12 @@ _df["hierarchy_indices"] = _df["Hierarchy"].apply(_parse_hierarchy)
 _index_to_name = dict(zip(_df.index, _df.trivialname, strict=False))
 
 # Map trivial names to their parent names (overshadowing groups)
-HIERARCHY_MAP: Dict[str, Set[str]] = {}
+HIERARCHY_MAP: dict[str, set[str]] = {}
 for _row in _df.itertuples():
     parents = {_index_to_name[idx] for idx in _row.hierarchy_indices if idx in _index_to_name}
     if parents:
         # Note: In the CSV, Hierarchy column lists groups that are PARENTS or COMPONENTS of the current group.
-        # e.g., Toluene [102] where 102 is Methyl. 
+        # e.g., Toluene [102] where 102 is Methyl.
         # This means Methyl is "overshadowed" if Toluene is found.
         HIERARCHY_MAP[_row.trivialname] = parents
 
@@ -53,16 +52,13 @@ _pattern_mapping = {
 _df["pattern_type"] = _df["group"].map(_pattern_mapping)
 
 # Internal storage of compiled patterns with metadata
-_FUNCTIONAL_GROUP_PATTERNS_INTERNAL: List[Dict] = []
+_FUNCTIONAL_GROUP_PATTERNS_INTERNAL: list[dict] = []
 for _row in _df.itertuples():
     _name = _row.trivialname
     _pattern_str = _row.SMARTS
     _type = _row.pattern_type
 
-    if _type == "smarts":
-        _pattern_mol = Chem.MolFromSmarts(_pattern_str)
-    else:  # smiles
-        _pattern_mol = Chem.MolFromSmiles(_pattern_str)
+    _pattern_mol = Chem.MolFromSmarts(_pattern_str) if _type == "smarts" else Chem.MolFromSmiles(_pattern_str)
 
     if _pattern_mol is not None:
         _FUNCTIONAL_GROUP_PATTERNS_INTERNAL.append({
@@ -72,29 +68,25 @@ for _row in _df.itertuples():
             "group": _row.group,
             "pattern_type": _type,
             "priority": _row.Index,
-            "hierarchy": HIERARCHY_MAP.get(_name, set())
+            "hierarchy": HIERARCHY_MAP.get(_name, set()),
         })
 
 # Public list maintained for backwards compatibility
-FUNCTIONAL_GROUP_PATTERNS: List[Tuple[str, Chem.Mol]] = [
+FUNCTIONAL_GROUP_PATTERNS: list[tuple[str, Chem.Mol]] = [
     (p["name"], p["pattern"]) for p in _FUNCTIONAL_GROUP_PATTERNS_INTERNAL
 ]
 
 # Maintain for compatibility
-FUNCTIONAL_GROUP_SMARTS = dict(
-    zip(_df.trivialname, zip(_df.SMARTS, _df.pattern_type, strict=False), strict=False)
-)
+FUNCTIONAL_GROUP_SMARTS = dict(zip(_df.trivialname, zip(_df.SMARTS, _df.pattern_type, strict=False), strict=False))
 
 
-def get_functional_group_matches(
-    mol: Chem.Mol, include_overshadowed: bool = False
-) -> pd.DataFrame:
+def get_functional_group_matches(mol: Chem.Mol, include_overshadowed: bool = False) -> pd.DataFrame:
     """
     Applies functional group patterns and returns a DataFrame with detailed metadata.
 
     Args:
         mol: The RDKit molecule to analyze.
-        include_overshadowed: If False, filters out groups that are part of a larger 
+        include_overshadowed: If False, filters out groups that are part of a larger
             detected group.
 
     Returns:
@@ -107,7 +99,7 @@ def get_functional_group_matches(
             - pattern_type: either 'smarts' or 'smiles'.
 
 
-    WARNING: These SMARTS patterns are taken from 
+    WARNING: These SMARTS patterns are taken from
     https://github.com/torbengutermuth/SmartChemist/blob/main/smarts/License_for_patterns_here
     These patterns have aCreative Commons Attribution-NoDerivatives 4.0 International Public License
     If you use these patterns in your own code, remember to credit them!
@@ -117,17 +109,15 @@ def get_functional_group_matches(
     for idx, p_info in enumerate(_FUNCTIONAL_GROUP_PATTERNS_INTERNAL):
         matches = mol.GetSubstructMatches(p_info["pattern"])
         for atom_ids in matches:
-            all_raw_matches.append(
-                {
-                    "name": p_info["name"],
-                    "atom_ids": tuple(sorted(atom_ids)),
-                    "atom_set": set(atom_ids),
-                    "priority": idx,
-                    "smarts": p_info["smarts"],
-                    "group": p_info["group"],
-                    "pattern_type": p_info["pattern_type"],
-                }
-            )
+            all_raw_matches.append({
+                "name": p_info["name"],
+                "atom_ids": tuple(sorted(atom_ids)),
+                "atom_set": set(atom_ids),
+                "priority": idx,
+                "smarts": p_info["smarts"],
+                "group": p_info["group"],
+                "pattern_type": p_info["pattern_type"],
+            })
 
     if not include_overshadowed:
         filtered_matches = []
@@ -143,11 +133,9 @@ def get_functional_group_matches(
                     break
 
                 # Rule 2: Identical atom sets
-                if m1["atom_set"] == m2["atom_set"]:
-                    # Check explicit hierarchy (child vs parent)
-                    if m1["name"] in HIERARCHY_MAP.get(m2["name"], set()):
-                        is_overshadowed = True
-                        break
+                if m1["atom_set"] == m2["atom_set"] and m1["name"] in HIERARCHY_MAP.get(m2["name"], set()):
+                    is_overshadowed = True
+                    break
 
             if not is_overshadowed:
                 filtered_matches.append(m1)
@@ -158,11 +146,11 @@ def get_functional_group_matches(
     rows = []
     for m in results:
         rows.append({
-            "name": m["name"], 
+            "name": m["name"],
             "atom_ids": m["atom_ids"],
             "smarts": m["smarts"],
             "group": m["group"],
-            "pattern_type": m["pattern_type"]
+            "pattern_type": m["pattern_type"],
         })
 
     return pd.DataFrame(rows)
@@ -180,7 +168,7 @@ def get_all_functional_group_patterns() -> pd.DataFrame:
             - group: the group category (functional_group, biological, cyclic).
             - pattern_type: either 'smarts' or 'smiles'.
 
-    WARNING: These SMARTS patterns are taken from 
+    WARNING: These SMARTS patterns are taken from
     https://github.com/torbengutermuth/SmartChemist/blob/main/smarts/License_for_patterns_here
     These patterns have aCreative Commons Attribution-NoDerivatives 4.0 International Public License
     If you use these patterns in your own code, remember to credit them!
@@ -198,4 +186,3 @@ def get_all_functional_group_patterns() -> pd.DataFrame:
             "hierarchy": p_info["hierarchy"],
         })
     return pd.DataFrame(rows)
-

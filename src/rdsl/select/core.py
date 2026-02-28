@@ -1,4 +1,4 @@
-from typing import Literal, NamedTuple, Optional
+from typing import Literal, NamedTuple
 
 import numpy as np
 from loguru import logger
@@ -7,15 +7,17 @@ from rdkit import Chem
 from rdsl.select.parser import _parse_expr
 from rdsl.select.utils import _create_context
 
+
 class SelectionResult(NamedTuple):
     """Result of a molecule selection.
-    
+
     Attributes:
         mol: The extracted subset molecule, or None if no atoms were selected.
         atom_mapping: Mapping from new atom indices to original atom indices.
         bond_mapping: Mapping from new bond indices to original bond indices.
     """
-    mol: Optional[Chem.Mol]
+
+    mol: Chem.Mol | None
     atom_mapping: dict[int, int]
     bond_mapping: dict[int, int]
 
@@ -53,7 +55,7 @@ def select_atom_ids(mol: Chem.Mol, expr: str) -> np.ndarray:
 
 def select_atoms(mol: Chem.Mol, expr: str) -> list[Chem.Atom]:
     """Select atoms from an RDKit molecule and return them as Atom objects.
-    
+
     Args:
         mol: RDKit molecule
         expr: Selection expression
@@ -75,8 +77,8 @@ def select_atoms(mol: Chem.Mol, expr: str) -> list[Chem.Atom]:
 
 
 def select_molecule(
-    mol: Chem.Mol, 
-    expr: str, 
+    mol: Chem.Mol,
+    expr: str,
     broken_bonds: Literal["radicals", "hydrogens", "wildcards"] = "hydrogens",
 ) -> SelectionResult:
     """Extract a subset of a molecule based on a selection expression.
@@ -108,13 +110,13 @@ def select_molecule(
 
     # Copy molecule and handle broken bonds
     new_mol = Chem.RWMol(mol)
-    
+
     # Store original indices in atom/bond properties for mapping later
     for atom in new_mol.GetAtoms():
         atom.SetIntProp("_original_idx", atom.GetIdx())
     for bond in new_mol.GetBonds():
         bond.SetIntProp("_original_idx", bond.GetIdx())
-    
+
     if broken_bonds == "radicals":
         for atom in new_mol.GetAtoms():
             atom.SetNumExplicitHs(atom.GetTotalNumHs())
@@ -124,11 +126,11 @@ def select_molecule(
         # Find which bonds connect a selected atom to a non-selected one
         selected_set = set(selected_indices)
         has_coords = mol.GetNumConformers() > 0
-        
+
         for bond in mol.GetBonds():
             idx1 = bond.GetBeginAtomIdx()
             idx2 = bond.GetEndAtomIdx()
-            
+
             kept_idx = None
             removed_idx = None
             if idx1 in selected_set and idx2 not in selected_set:
@@ -137,12 +139,12 @@ def select_molecule(
             elif idx2 in selected_set and idx1 not in selected_set:
                 kept_idx = idx2
                 removed_idx = idx1
-                
+
             if kept_idx is not None:
                 # Add wildcard atom and connect with the same bond type
-                wildcard_idx = new_mol.AddAtom(Chem.Atom(0)) # Atomic number 0 is '*'
+                wildcard_idx = new_mol.AddAtom(Chem.Atom(0))  # Atomic number 0 is '*'
                 new_mol.AddBond(kept_idx, wildcard_idx, bond.GetBondType())
-                
+
                 # Set 3D position if conformers exist
                 if has_coords:
                     for i in range(mol.GetNumConformers()):
@@ -158,7 +160,7 @@ def select_molecule(
     # Collect mapping and clear properties
     atom_mapping = {}
     bond_mapping = {}
-   
+
     for atom in subset_mol.GetAtoms():
         if atom.HasProp("_original_idx"):
             atom_mapping[atom.GetIdx()] = atom.GetIntProp("_original_idx")

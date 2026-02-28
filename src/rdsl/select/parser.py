@@ -20,13 +20,13 @@ from rdsl.select.base import (
     _EXPANSION_OPS,
     _FIRSTLAST_OPS,
     _FLAG_OPS,
+    _FUNCTIONAL_OP,
     _GAP_OPS,
     _IDENTIFIER,
     _INTEGER,
     _NEIGHBOR_OPS,
     _RING_OPS,
     _SMARTS_OP,
-    _FUNCTIONAL_OP,
     _SUBSET_OPS,
     _UNARY_OPS,
     _flatten,
@@ -41,10 +41,10 @@ from rdsl.select.ops import (
     ExtendOp,
     FirstLastOp,
     FlagOp,
+    FunctionalOp,
     GapOp,
     RingSizeOp,
     SmartsOp,
-    FunctionalOp,
     UnaryOp,
 )
 
@@ -66,12 +66,20 @@ def _create_parser():
 
     # SMARTS pattern: smarts "pattern" or smarts 'pattern'
     smarts_pattern = QuotedString('"', unquote_results=True) | QuotedString("'", unquote_results=True)
-    smarts_ops = [(CaselessKeyword(kw) + smarts_pattern).set_parse_action(SmartsOp) for op in _SMARTS_OP for kw in _flatten(op)]
-    
-    # Functional group pattern: functional "alcohol", functional 'alcohol', or functional ketone
-    functional_ops = [(CaselessKeyword(kw) + _IDENTIFIER).set_parse_action(FunctionalOp) for op in _FUNCTIONAL_OP for kw in _flatten(op)]
+    smarts_ops = [
+        (CaselessKeyword(kw) + smarts_pattern).set_parse_action(SmartsOp) for op in _SMARTS_OP for kw in _flatten(op)
+    ]
 
-    ring_ops = [(CaselessKeyword(kw) + _INTEGER).set_parse_action(RingSizeOp) for op in _RING_OPS for kw in _flatten(op)]
+    # Functional group pattern: functional "alcohol", functional 'alcohol', or functional ketone
+    functional_ops = [
+        (CaselessKeyword(kw) + _IDENTIFIER).set_parse_action(FunctionalOp)
+        for op in _FUNCTIONAL_OP
+        for kw in _flatten(op)
+    ]
+
+    ring_ops = [
+        (CaselessKeyword(kw) + _INTEGER).set_parse_action(RingSizeOp) for op in _RING_OPS for kw in _flatten(op)
+    ]
 
     # compare_ops must come before attr_ops in MatchFirst to avoid partial consumption
     selector_op = MatchFirst(op for op in flag_ops + compare_ops + attr_ops + smarts_ops + functional_ops + ring_ops)
@@ -81,7 +89,9 @@ def _create_parser():
     subset_ops = [(CaselessKeyword(kw), 2, OpAssoc.LEFT, BinaryOp) for op in _SUBSET_OPS for kw in _flatten(op)]
 
     expand_ops = [(CaselessKeyword(kw), 1, OpAssoc.RIGHT, ExpandOp) for op in _EXPANSION_OPS for kw in _flatten(op)]
-    firstlast_ops = [(CaselessKeyword(kw), 1, OpAssoc.RIGHT, FirstLastOp) for op in _FIRSTLAST_OPS for kw in _flatten(op)]
+    firstlast_ops = [
+        (CaselessKeyword(kw), 1, OpAssoc.RIGHT, FirstLastOp) for op in _FIRSTLAST_OPS for kw in _flatten(op)
+    ]
 
     _EXTEND_N = Regex(r"\d+").set_parse_action(lambda t: int(t[0]))
     extend_ops = [
@@ -91,12 +101,16 @@ def _create_parser():
         (CaselessKeyword(kw), 1, OpAssoc.RIGHT, ExtendOp) for op in (_BOND_OPS + _NEIGHBOR_OPS) for kw in _flatten(op)
     ]
 
-    around_ops = [(CaselessKeyword(kw) + _DECIMAL, 1, OpAssoc.LEFT, AroundOp) for op in _AROUND_OPS for kw in _flatten(op)]
+    around_ops = [
+        (CaselessKeyword(kw) + _DECIMAL, 1, OpAssoc.LEFT, AroundOp) for op in _AROUND_OPS for kw in _flatten(op)
+    ]
 
     gap_ops = [(CaselessKeyword(kw) + _DECIMAL, 1, OpAssoc.LEFT, GapOp) for op in _GAP_OPS for kw in _flatten(op)]
 
     dist_ops = [
-        (CaselessKeyword(kw) + _DECIMAL + CaselessKeyword("of"), 2, OpAssoc.LEFT, DistOp) for op in _DIST_OPS for kw in _flatten(op)
+        (CaselessKeyword(kw) + _DECIMAL + CaselessKeyword("of"), 2, OpAssoc.LEFT, DistOp)
+        for op in _DIST_OPS
+        for kw in _flatten(op)
     ]
 
     expr = infix_notation(

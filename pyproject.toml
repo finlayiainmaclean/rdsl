@@ -20,7 +20,6 @@ classifiers = [
 dependencies = [
     "pandas>=2.3.3",
     "rdkit>=2025.9.4",
-    "pandas>=2.2.0",
     "pyparsing>=3.1.0",
     "numpy>=1.26.0",
     "loguru>=0.7.3",
@@ -104,6 +103,9 @@ ignore = [
     "E501",
     # DoNotAssignLambda
     "E731",
+    # Too complex
+    "C901",
+
 ]
 
 [tool.ruff.lint.per-file-ignores]
@@ -118,4 +120,3 @@ skip_empty = true
 [tool.coverage.run]
 branch = true
 source = ["src"]
-

@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 from rdkit import Chem
 
+from rdsl.functional_groups import get_functional_group_matches
 from rdsl.select.base import (
     _ALIASES,
     _FEATURE_FACTORY,
@@ -14,7 +15,6 @@ from rdsl.select.base import (
     InvalidPatternError,
     SelectionParserError,
 )
-from rdsl.functional_groups import get_functional_group_matches
 
 
 class CompareOp(BaseOp):
@@ -443,10 +443,10 @@ class ExpandOp(BaseOp):
                 groups = atom_to_groups.get(idx)
                 if not groups:
                     continue
-                
+
                 # Find the largest size among groups containing this specific atom
                 max_size = max(len(g) for g in groups)
-                
+
                 # Add all atoms from all groups that have this maximum size for THIS atom
                 for g in groups:
                     if len(g) == max_size:

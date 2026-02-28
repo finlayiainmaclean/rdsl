@@ -1,4 +1,3 @@
-from rdsl.select.consts import SIDECHAIN_ATOMS
 from pathlib import Path
 
 import numpy as np
@@ -7,6 +6,7 @@ from rdkit import Chem
 from rdkit.Chem import AllChem
 
 from rdsl.select import select_atom_ids, select_molecule
+from rdsl.select.consts import SIDECHAIN_ATOMS
 
 
 @pytest.mark.parametrize(
@@ -264,9 +264,8 @@ def test_select_pdb_structural_flags(pdb_mol):
     """Test sidechain, backbone, and solvent flags."""
 
     side_chain_atom_names = set()
-    for resn, atom_names in SIDECHAIN_ATOMS.items():
+    for _resn, atom_names in SIDECHAIN_ATOMS.items():
         side_chain_atom_names.update(atom_names)
-   
 
     submol = select_molecule(pdb_mol, "sidechain").mol
     for atom in submol.GetAtoms():
@@ -324,7 +323,6 @@ def test_select_pdb_molecule_flags(pdb_mol):
     assert submol.GetNumAtoms() == 1
 
 
-
 def test_select_pdb_expansion(pdb_mol):
     """Test bychain and byres expansion on PDB molecule."""
     # resn 6IC is in chain A
@@ -340,7 +338,7 @@ def test_select_pdb_expansion(pdb_mol):
     # All atoms in the 6IC residue should be selected
     resnames = {a.GetPDBResidueInfo().GetResidueName().strip() for a in submol_f.GetAtoms()}
     assert "6IC" in resnames
-    
+
     # And check that it actually selected more than just the F atoms
     f_atoms = [a for a in submol_f.GetAtoms() if a.GetSymbol() == "F"]
     non_f_atoms = [a for a in submol_f.GetAtoms() if a.GetSymbol() != "F"]
