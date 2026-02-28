@@ -92,7 +92,7 @@ print(df[["name", "atom_ids", "group"]])
 atom_ids = select_atom_ids(mol, "donors and ringsize 5")
 mol
 ```
-![alt text](image.png)
+<img src="image.png" width="400" alt="Selection example">
 
 ## Acknowledgements
 
