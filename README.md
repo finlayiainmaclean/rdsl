@@ -88,6 +88,12 @@ print(df[["name", "atom_ids", "group"]])
 | **Neighbors** | `neighbor <expr>`, `bound_to <expr>` |
 
 
+```python
+atom_ids = select_atom_ids(mol, "donors and ringsize 5")
+mol
+```
+![alt text](image.png)
+
 ## Acknowledgements
 
 - **Functional Groups**: The SMARTS patterns used for functional group detection are taken from [SmartChemist](https://github.com/torbengutermuth/SmartChemist) by Torben Gutermuth. NB: Make sure to cite SmartChemist in any publications that use this functionality, and do not modify the SMARTS patterns in a way that violates the license.

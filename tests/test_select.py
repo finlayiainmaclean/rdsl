@@ -5,7 +5,7 @@ import pytest
 from rdkit import Chem
 from rdkit.Chem import AllChem
 
-from rdsl.select import select_atom_ids, select_molecule
+from rdsl import select_atom_ids, select_molecule
 from rdsl.select.consts import SIDECHAIN_ATOMS
 
 

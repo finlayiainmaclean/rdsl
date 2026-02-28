@@ -1,7 +1,7 @@
 import pandas as pd
 from rdkit import Chem
 
-from rdsl.functional_groups import get_functional_group_matches
+from rdsl import get_functional_group_matches
 
 
 def test_basic_functional_groups():
