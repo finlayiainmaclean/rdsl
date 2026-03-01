@@ -486,7 +486,16 @@ class NthOp(BaseOp):
     def __init__(self, tokens):
         # Prefix operator: tokens stores [[keyword, *indices, rhs]]
         self.kw = _ALIASES[tokens[0][0]]
-        self.indices = set(tokens[0][1:-1])
+
+        # Flatten indices because _INTEGER returns lists or numbers depending on parsing
+        raw_indices = tokens[0][1:-1]
+        self.indices = set()
+        for idx_item in raw_indices:
+            if hasattr(idx_item, "__iter__") and not isinstance(idx_item, (str, bytes)):
+                self.indices.update(idx_item)
+            else:
+                self.indices.add(idx_item)
+
         self.rhs = tokens[0][-1]
 
     def apply(self, mol: Chem.Mol, ctx: pd.DataFrame) -> np.ndarray:

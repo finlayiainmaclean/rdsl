@@ -13,7 +13,6 @@ from pyparsing import (
 from rdsl.select.base import (
     _AROUND_OPS,
     _ATTR_OPS,
-    _BINARY_OPS,
     _BOND_OPS,
     _DECIMAL,
     _DIST_OPS,
@@ -88,7 +87,8 @@ def _create_parser():
     selector_op = MatchFirst(op for op in flag_ops + compare_ops + attr_ops + smarts_ops + functional_ops + ring_ops)
 
     unary_ops = [(CaselessKeyword(kw), 1, OpAssoc.RIGHT, UnaryOp) for op in _UNARY_OPS for kw in _flatten(op)]
-    binary_ops = [(CaselessKeyword(kw), 2, OpAssoc.LEFT, BinaryOp) for op in _BINARY_OPS for kw in _flatten(op)]
+    and_ops = [(CaselessKeyword(kw), 2, OpAssoc.LEFT, BinaryOp) for kw in ["and", "&"]]
+    or_ops = [(CaselessKeyword(kw), 2, OpAssoc.LEFT, BinaryOp) for kw in ["or", "|"]]
     subset_ops = [(CaselessKeyword(kw), 2, OpAssoc.LEFT, BinaryOp) for op in _SUBSET_OPS for kw in _flatten(op)]
 
     expand_ops = [(CaselessKeyword(kw), 1, OpAssoc.RIGHT, ExpandOp) for op in _EXPANSION_OPS for kw in _flatten(op)]
@@ -119,16 +119,24 @@ def _create_parser():
 
     expr = infix_notation(
         selector_op,
-        unary_ops
-        + binary_ops
-        + expand_ops
-        + firstlast_ops
-        + nth_ops
-        + extend_ops
-        + around_ops
-        + gap_ops
-        + dist_ops
-        + subset_ops,
+        [
+            # Level 1: NOT
+            *unary_ops,
+            # Level 2: Positional/Expansion/Topology
+            *nth_ops,
+            *firstlast_ops,
+            *extend_ops,
+            *around_ops,
+            *gap_ops,
+            *dist_ops,
+            *expand_ops,
+            # Level 3: Subset
+            *subset_ops,
+            # Level 4: AND
+            *and_ops,
+            # Level 5: OR
+            *or_ops,
+        ],
     )
     return expr
 
