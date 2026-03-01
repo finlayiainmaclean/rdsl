@@ -34,13 +34,14 @@ def select_atom_ids(mol: Chem.Mol, expr: str) -> np.ndarray:
         Array of selected atom indices (0-based)
 
     Examples:
-        >>> select(mol, "aromatic")  # All aromatic atoms
-        >>> select(mol, "elem C and ring")  # Carbon atoms in rings
-        >>> select(mol, 'smarts "c1ccccc1"')  # Benzene rings
-        >>> select(mol, "ringsize 6")  # Atoms in 6-membered rings
-        >>> select(mol, "elem C within 3.0 of elem N")  # Carbons within 3.0 Angstroms of nitrogen
-        >>> select(mol, "first elem C")  # First carbon by index
-        >>> select(mol, "last ring")  # Last atom in ring
+        >>> select_atom_ids(mol, "aromatic")  # All aromatic atoms
+        >>> select_atom_ids(mol, "elem C and ring")  # Carbon atoms in rings
+        >>> select_atom_ids(mol, 'smarts "c1ccccc1"')  # Benzene rings
+        >>> select_atom_ids(mol, "ringsize 6")  # Atoms in 6-membered rings
+        >>> select_atom_ids(mol, "elem C within 3.0 of elem N")  # Carbons within 3.0 Angstroms of nitrogen
+        >>> select_atom_ids(mol, "first elem C")  # First carbon by index
+        >>> select_atom_ids(mol, "nth 1 aromatic")  # First aromatic atom
+        >>> select_atom_ids(mol, "last ring")  # Last atom in ring
     """
     parsed = _parse_expr(expr)
     ctx = _create_context(mol)

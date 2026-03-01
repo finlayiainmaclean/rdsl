@@ -26,6 +26,7 @@ from rdsl.select.base import (
     _IDENTIFIER,
     _INTEGER,
     _NEIGHBOR_OPS,
+    _NTH_OPS,
     _RING_OPS,
     _SMARTS_OP,
     _SUBSET_OPS,
@@ -44,6 +45,7 @@ from rdsl.select.ops import (
     FlagOp,
     FunctionalOp,
     GapOp,
+    NthOp,
     RingSizeOp,
     SmartsOp,
     UnaryOp,
@@ -93,6 +95,7 @@ def _create_parser():
     firstlast_ops = [
         (CaselessKeyword(kw), 1, OpAssoc.RIGHT, FirstLastOp) for op in _FIRSTLAST_OPS for kw in _flatten(op)
     ]
+    nth_ops = [(CaselessKeyword(kw) + _INTEGER, 1, OpAssoc.RIGHT, NthOp) for op in _NTH_OPS for kw in _flatten(op)]
 
     _EXTEND_N = Regex(r"\d+").set_parse_action(lambda t: int(t[0]))
     extend_ops = [
@@ -116,7 +119,16 @@ def _create_parser():
 
     expr = infix_notation(
         selector_op,
-        unary_ops + binary_ops + expand_ops + firstlast_ops + extend_ops + around_ops + gap_ops + dist_ops + subset_ops,
+        unary_ops
+        + binary_ops
+        + expand_ops
+        + firstlast_ops
+        + nth_ops
+        + extend_ops
+        + around_ops
+        + gap_ops
+        + dist_ops
+        + subset_ops,
     )
     return expr
 

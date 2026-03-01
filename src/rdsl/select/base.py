@@ -59,21 +59,23 @@ _FLAG_OPS = [
     ("aromatic", []),
     ("aliphatic", []),
     ("hetatm", []),
-    ("hydrogens", ["h."]),
+    ("hydrogens", ["h.", "hydrogen"]),
     ("heavy", []),
-    ("ring", []),
+    ("cyclic", ["ring"]),
+    ("acyclic", []),
     ("sidechain", ["sc."]),
     ("backbone", ["bb."]),
     ("solvent", ["sol."]),
-    ("metals", []),
+    ("metals", ["metal"]),
     ("polymer", ["pol."]),
     ("protein", []),
     ("nucleic", []),
     ("inorganic", ["ino."]),
     ("organic", ["org."]),
     ("artifact", []),
-    ("donors", ["don."]),
-    ("acceptors", ["acc."]),
+    ("donors", ["don.", "donor"]),
+    ("acceptors", ["acc.", "acceptor"]),
+    ("artefact", []),
     *_SMARTS_FLAG_OPS,
     *[(name, []) for name in _FEATURE_MAP if name not in ("donors", "acceptors")],
 ]
@@ -138,6 +140,7 @@ _NEIGHBOR_OPS = [("neighbor", ["nbr."])]
 _AROUND_OPS = [("around", ["a."])]
 _GAP_OPS = [("gap", [])]
 _EXTEND_OPS = [("extend", ["xt."])]
+_NTH_OPS = [("nth", [])]
 
 _ALL_OPS = (
     _FLAG_OPS
@@ -147,6 +150,7 @@ _ALL_OPS = (
     + _RING_OPS
     + _EXPANSION_OPS
     + _FIRSTLAST_OPS
+    + _NTH_OPS
     + _DIST_OPS
     + _UNARY_OPS
     + _BINARY_OPS

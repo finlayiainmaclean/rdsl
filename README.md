@@ -74,7 +74,7 @@ For an online web server from the original authors, see [SmartChemist](https://c
 | **Logic** | `and`, `or`, `not`, `( )` |
 | **Selection** | `first`, `last`, `in` |
 | **Basic Flags** | `all`, `none`, `heavy`, `hydrogens`|
-| **Atom Attributes** | `elem`, `atomic_number`, `isotope`, `mass`, `index`, `formal_charge`, `partial_charge`, `valence`, `degree`, `hybridization`, `chirality`, `ring`, `aromatic`, `aliphatic` |
+| **Atom Attributes** | `elem`, `atomic_number`, `isotope`, `mass`, `index`, `formal_charge`, `partial_charge`, `valence`, `degree`, `hybridization`, `stereo`, `ring`, `aromatic`, `aliphatic` |
 | **Pharmacophore**| `donors`, `acceptors`, `hydrophobes`, `pos_ionizable`, `neg_ionizable`, `zn_binders` |
 | **MedChem Alerts** | `alerts` |
 | **Functional Groups** | `functional "<name>"` |

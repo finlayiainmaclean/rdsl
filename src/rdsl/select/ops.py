@@ -478,3 +478,28 @@ class FirstLastOp(BaseOp):
 
     def __repr__(self):
         return f"firstlast(op='{self.op}', rhs={self.rhs})"
+
+
+class NthOp(BaseOp):
+    """Select the nth atoms in the selection (1-indexed)."""
+
+    def __init__(self, tokens):
+        # Prefix operator: tokens stores [[keyword, *indices, rhs]]
+        self.kw = _ALIASES[tokens[0][0]]
+        self.indices = set(tokens[0][1:-1])
+        self.rhs = tokens[0][-1]
+
+    def apply(self, mol: Chem.Mol, ctx: pd.DataFrame) -> np.ndarray:
+        mask = self.rhs.apply(mol, ctx)
+        indices = np.where(mask)[0]
+        result = np.zeros(len(ctx), dtype=bool)
+        if len(indices) > 0:
+            for i in self.indices:
+                # 1-indexed to 0-indexed
+                idx_pos = i - 1
+                if 0 <= idx_pos < len(indices):
+                    result[indices[idx_pos]] = True
+        return result
+
+    def __repr__(self):
+        return f"nth(indices={self.indices}, rhs={self.rhs})"

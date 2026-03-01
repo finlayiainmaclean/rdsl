@@ -250,6 +250,8 @@ def _create_context(mol: Chem.Mol) -> pd.DataFrame:
             "isotope": atom.GetIsotope(),
             "aromatic": atom.GetIsAromatic(),
             "aliphatic": not atom.GetIsAromatic(),
+            "cyclic": atom.IsInRing(),
+            "acyclic": not atom.IsInRing(),
             "hetatm": residue_info.GetIsHeteroAtom() if residue_info else None,
             "hydrogens": atom.GetSymbol() == "H",
             "heavy": atom.GetSymbol() != "H",
@@ -285,6 +287,7 @@ def _create_context(mol: Chem.Mol) -> pd.DataFrame:
             "inorganic": bool(inorganic_mask[idx]),
             "organic": bool(organic_mask[idx]),
             "metals": _is_metal(atom),
+            "artefact": _is_artifact(residue_info),
         })
 
     return pd.DataFrame(data)
