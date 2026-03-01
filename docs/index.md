@@ -100,9 +100,9 @@ RDSL provides a powerful syntax for defining atom selections.
 *   **Rings**:
     *   `ringsize <n>` : Atoms in rings of size n
     *   `inring` : Atoms in rings
-    **Functional Groups**:
+*    **Functional Groups**:
     *   `functional "<name>"` : Select atoms in specific functional group
-    **PDB**:
+*    **PDB**:
     *   `resi <n>` (also `i.`) : Select atoms by residue index
     *   `resn <name>` (also `r.`) : Select atoms by residue name
     *   `resv <id>` : Select atoms by residue variant
