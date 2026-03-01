@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from rdkit import Chem
-from rdkit.Chem import AllChem, rdchem
+from rdkit.Chem import rdchem, rdPartialCharges
 
 from rdsl.select.consts import (
     _ARTIFACT_RESIDUES,
@@ -232,7 +232,7 @@ def _create_context(mol: Chem.Mol) -> pd.DataFrame:
     organic_mask = _get_organic_atoms(mol, inorganic_mask)
 
     if not mol.GetAtomWithIdx(0).HasProp("_GasteigerCharge"):
-        AllChem.ComputeGasteigerCharges(mol)
+        rdPartialCharges.ComputeGasteigerCharges(mol)
 
     Chem.AssignStereochemistry(mol, force=True, cleanIt=True)
 

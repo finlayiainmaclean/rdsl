@@ -35,13 +35,13 @@ _index_to_name = dict(zip(_df.index, _df.trivialname, strict=False))
 
 # Map trivial names to their parent names (overshadowing groups)
 HIERARCHY_MAP: dict[str, set[str]] = {}
-for _row in _df.itertuples():
-    parents = {_index_to_name[idx] for idx in _row.hierarchy_indices if idx in _index_to_name}
+for _row in _df.reset_index().to_dict("records"):
+    parents = {_index_to_name[idx] for idx in _row["hierarchy_indices"] if idx in _index_to_name}
     if parents:
         # Note: In the CSV, Hierarchy column lists groups that are PARENTS or COMPONENTS of the current group.
         # e.g., Toluene [102] where 102 is Methyl.
         # This means Methyl is "overshadowed" if Toluene is found.
-        HIERARCHY_MAP[_row.trivialname] = parents
+        HIERARCHY_MAP[_row["trivialname"]] = parents
 
 # Map the groups to their respective RDKit pattern types
 _pattern_mapping = {
@@ -53,10 +53,10 @@ _df["pattern_type"] = _df["group"].map(_pattern_mapping)
 
 # Internal storage of compiled patterns with metadata
 _FUNCTIONAL_GROUP_PATTERNS_INTERNAL: list[dict] = []
-for _row in _df.itertuples():
-    _name = _row.trivialname
-    _pattern_str = _row.SMARTS
-    _type = _row.pattern_type
+for _row in _df.reset_index().to_dict("records"):
+    _name = _row["trivialname"]
+    _pattern_str = _row["SMARTS"]
+    _type = _row["pattern_type"]
 
     _pattern_mol = Chem.MolFromSmarts(_pattern_str) if _type == "smarts" else Chem.MolFromSmiles(_pattern_str)
 
@@ -65,9 +65,9 @@ for _row in _df.itertuples():
             "name": _name,
             "pattern": _pattern_mol,
             "smarts": _pattern_str,
-            "group": _row.group,
+            "group": _row["group"],
             "pattern_type": _type,
-            "priority": _row.Index,
+            "priority": _row["index"],
             "hierarchy": HIERARCHY_MAP.get(_name, set()),
         })
 

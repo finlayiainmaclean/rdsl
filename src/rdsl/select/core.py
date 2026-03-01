@@ -4,6 +4,7 @@ import numpy as np
 from loguru import logger
 from rdkit import Chem
 
+from rdsl.select.base import BrokenBondError
 from rdsl.select.parser import _parse_expr
 from rdsl.select.utils import _create_context
 
@@ -147,6 +148,8 @@ def select_molecule(
 
                 # Set 3D position if conformers exist
                 if has_coords:
+                    if removed_idx is None:
+                        raise BrokenBondError(bond.GetIdx())
                     for i in range(mol.GetNumConformers()):
                         pos = mol.GetConformer(i).GetAtomPosition(removed_idx)
                         new_mol.GetConformer(i).SetAtomPosition(wildcard_idx, pos)

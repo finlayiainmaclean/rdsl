@@ -18,8 +18,8 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 dependencies = [
-    "pandas>=2.3.3",
-    "rdkit>=2025.9.4",
+    "pandas>=2.0.0",
+    "rdkit>=2023.1.1",
     "pyparsing>=3.1.0",
     "numpy>=1.26.0",
     "loguru>=0.7.3",
@@ -53,9 +53,6 @@ build-backend = "hatchling.build"
 [tool.hatch.build.targets.wheel]
 packages = ["src/rdsl"]
 
-[tool.ty.environment]
-python = "./.venv"
-python-version = "3.10"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -120,3 +117,7 @@ skip_empty = true
 [tool.coverage.run]
 branch = true
 source = ["src"]
+
+[tool.ty.environment]
+python = "./.venv"
+python-version = "3.10"

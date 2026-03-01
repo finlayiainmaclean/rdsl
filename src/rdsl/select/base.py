@@ -3,19 +3,20 @@ import abc
 # Setup recursion limit and pyparsing packrat
 import sys
 from pathlib import Path
+from typing import Any, cast
 
 import numpy as np
 import pandas as pd
 from pyparsing import DelimitedList, ParserElement, QuotedString, Regex, Word, alphanums
 from rdkit import Chem, RDConfig
-from rdkit.Chem import AllChem
+from rdkit.Chem import ChemicalFeatures
 
 from .predefined import PREDEFINED_SMARTS
 
 sys.setrecursionlimit(3000)
 ParserElement.enable_packrat()
 
-_FEATURE_FACTORY = AllChem.BuildFeatureFactory(str(Path(RDConfig.RDDataDir) / "BaseFeatures.fdef"))
+_FEATURE_FACTORY = cast(Any, ChemicalFeatures).BuildFeatureFactory(str(Path(RDConfig.RDDataDir) / "BaseFeatures.fdef"))
 
 _FEATURE_MAP = {
     "donors": "Donor",
@@ -49,8 +50,8 @@ _DECIMAL_REGEX = r"[+-]?\d*\.?\d*"
 _DECIMAL = Regex(_DECIMAL_REGEX).set_parse_action(lambda t: float(t[0]))
 
 # Dynamically generate flag ops from SMARTS
-_SMARTS_FLAG_OPS = [(name, []) for name in PREDEFINED_SMARTS]
-_FEATURE_FLAG_OPS = [(name, []) for name in _FEATURE_MAP]
+_SMARTS_FLAG_OPS: list[tuple[str, list[str]]] = [(name, []) for name in PREDEFINED_SMARTS]
+_FEATURE_FLAG_OPS: list[tuple[str, list[str]]] = [(name, []) for name in _FEATURE_MAP]
 
 _FLAG_OPS = [
     ("all", ["*"]),
@@ -158,7 +159,7 @@ _ALL_OPS = (
 )
 
 
-def _flatten(op: tuple[str, list[str], ...]) -> tuple[str, ...]:
+def _flatten(op: tuple[str, list[str]] | tuple[str, list[str], Any]) -> tuple[str, ...]:
     return op[0], *op[1]
 
 
@@ -186,6 +187,13 @@ class SelectionParserError(SelectError):
             super().__init__(f"Expected {expected}, got {got}")
         else:
             super().__init__("Selection parsing failed")
+
+
+class BrokenBondError(SelectError):
+    """Raised when a broken bond cannot be correctly handled."""
+
+    def __init__(self, bond_idx: int):
+        super().__init__(f"Could not find the removed atom in the bond {bond_idx}")
 
 
 class InvalidPatternError(SelectError):
