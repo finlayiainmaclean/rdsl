@@ -1,3 +1,6 @@
+import argparse
+import sys
+from pathlib import Path
 from typing import Literal, NamedTuple
 
 import numpy as np
@@ -181,3 +184,80 @@ def select_molecule(
         logger.debug("Sanitization produced warnings for subset molecule")
 
     return SelectionResult(subset_mol, atom_mapping, bond_mapping)
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Select a subset of atoms from a molecule and save the result.")
+    parser.add_argument("input_file", help="Input molecule file (PDB or SDF)")
+    parser.add_argument("output_file", help="Output file to save the subset molecule")
+    parser.add_argument("query", help="Selection expression")
+    parser.add_argument(
+        "--broken-bonds",
+        choices=["radicals", "hydrogens", "wildcards"],
+        default="hydrogens",
+        help="How to handle broken bonds (default: hydrogens)",
+    )
+    args = parser.parse_args()
+
+    input_path = Path(args.input_file)
+    output_path = Path(args.output_file)
+
+    if not input_path.exists():
+        logger.error(f"Input file not found: {input_path}")
+        sys.exit(1)
+
+    ext = input_path.suffix.lower()
+
+    # Load molecule without removing hydrogens
+    if ext == ".pdb":
+        mol = Chem.MolFromPDBFile(str(input_path), removeHs=False, sanitize=False)
+    elif ext in [".sdf", ".sd", ".mol"]:
+        supplier = Chem.SDMolSupplier(str(input_path), removeHs=False, sanitize=True)
+        mol = None
+        for m in supplier:
+            if m is not None:
+                mol = m
+                break
+    else:
+        logger.error(f"Unsupported input file extension: {ext}. Only .pdb and .sdf/.sd/.mol are supported.")
+        sys.exit(1)
+
+    if mol is None:
+        logger.error(f"Failed to load molecule from {input_path}")
+        sys.exit(1)
+
+    logger.info(f"Applying query: '{args.query}' to {mol.GetNumAtoms()} atoms")
+    try:
+        result = select_molecule(mol, args.query, broken_bonds=args.broken_bonds)
+    except Exception as e:
+        logger.error(f"Selection failed: {e}")
+        sys.exit(1)
+
+    if result.mol is None:
+        logger.error("No atoms selected.")
+        sys.exit(1)
+
+    logger.info(f"Selected {result.mol.GetNumAtoms()} atoms. Saving to {output_path}")
+
+    out_ext = output_path.suffix.lower()
+    if out_ext == ".pdb":
+        try:
+            Chem.MolToPDBFile(result.mol, str(output_path))
+        except Exception as e:
+            logger.error(f"Failed to write PDB file: {e}")
+            sys.exit(1)
+    elif out_ext in [".sdf", ".sd", ".mol"]:
+        try:
+            writer = Chem.SDWriter(str(output_path))
+            writer.write(result.mol)
+            writer.close()
+        except Exception as e:
+            logger.error(f"Failed to write SDF file: {e}")
+            sys.exit(1)
+    else:
+        logger.error(f"Unsupported output file extension: {out_ext}. Only .pdb and .sdf/.sd/.mol are supported.")
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()

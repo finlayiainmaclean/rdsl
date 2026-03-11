@@ -1,16 +1,9 @@
-try:
-    import ipywidgets as widgets
-    from IPython.display import clear_output, display
-except ImportError:
-    msg = "display_functional_groups requires ipywidgets. Install it with 'pip install ipywidgets'."
-    raise ImportError(msg) from None
-
 from rdkit import Chem
-from rdsl.functional_groups import get_functional_group_matches
-from rdsl.highlight import highlight_atoms
-
 from rdkit.Chem import AllChem
 from rdkit.Chem.Draw import rdMolDraw2D
+
+from rdsl.functional_groups import get_functional_group_matches
+
 
 def display_functional_groups(mol: Chem.Mol, show_overshadowed: bool = False):
     """
@@ -21,20 +14,25 @@ def display_functional_groups(mol: Chem.Mol, show_overshadowed: bool = False):
         mol: The RDKit molecule to display.
         show_overshadowed: Whether to show overshadowed groups by default.
     """
+    try:
+        import ipywidgets as widgets
+        from IPython.display import clear_output, display
+    except ImportError:
+        msg = "display_functional_groups requires ipywidgets. Install it with 'pip install ipywidgets'."
+        raise ImportError(msg) from None
+
     # 0. Prepare Molecule (Force consistent 2D coordinates)
     mol = Chem.Mol(mol)
     if mol.GetNumConformers() == 0:
-        AllChem.Compute2DCoords(mol)
+        AllChem.Compute2DCoords(mol)  # type: ignore[attr-defined]
 
     # 1. Get matches
     all_df = get_functional_group_matches(mol, include_overshadowed=True)
     primary_df = get_functional_group_matches(mol, include_overshadowed=False)
 
     # Mark overshadowed
-    primary_keys = set(zip(primary_df["name"], primary_df["atom_ids"]))
-    all_df["is_overshadowed"] = all_df.apply(
-        lambda x: (x["name"], x["atom_ids"]) not in primary_keys, axis=1
-    )
+    primary_keys = set(zip(primary_df["name"], primary_df["atom_ids"], strict=True))
+    all_df["is_overshadowed"] = all_df.apply(lambda x: (x["name"], x["atom_ids"]) not in primary_keys, axis=1)
 
     # 2. Sort according to requirements
     match_sort_order = {
@@ -43,7 +41,7 @@ def display_functional_groups(mol: Chem.Mol, show_overshadowed: bool = False):
         "biological": 2,
         "overshadowed": 3,
     }
-    
+
     def get_sort_rank(row):
         if row["is_overshadowed"]:
             return match_sort_order["overshadowed"]
@@ -65,17 +63,21 @@ def display_functional_groups(mol: Chem.Mol, show_overshadowed: bool = False):
     state = {
         "selected_idx": initial_selection,
         "show_overshadowed": show_overshadowed,
-        "filtered_indices": []  # Indices into all_df
+        "filtered_indices": [],  # Indices into all_df
     }
 
     # 4. Widgets
-    mol_output = widgets.Output(layout=widgets.Layout(width="550px", height="450px", display="flex", align_items="center", justify_content="center"))
+    mol_output = widgets.Output(
+        layout=widgets.Layout(
+            width="550px", height="450px", display="flex", align_items="center", justify_content="center"
+        )
+    )
     list_header = widgets.HTML("<h2 style='font-family: sans-serif; margin-bottom: 10px;'>Substructures</h2>")
-    
+
     # We'll use a container for buttons to allow scrolling
     buttons_layout = widgets.VBox(layout=widgets.Layout(max_height="400px", overflow_y="auto"))
     list_container = widgets.VBox([list_header, buttons_layout], layout=widgets.Layout(width="350px"))
-    
+
     toggle_btn = widgets.Button(
         description="Toggle overshadowed ⓘ",
         layout=widgets.Layout(width="100%", height="40px", margin="10px 0 0 0"),
@@ -96,17 +98,17 @@ def display_functional_groups(mol: Chem.Mol, show_overshadowed: bool = False):
             flex-shrink: 0 !important;
             min-height: 35px !important;
         }
-        
+
         .fg-btn-functional_group { background-color: #e7f1ff !important; color: #0056b3 !important; }
         .fg-btn-cyclic { background-color: #e2e3e5 !important; color: #383d41 !important; }
         .fg-btn-biological { background-color: #d4edda !important; color: #155724 !important; }
         .fg-btn-overshadowed { background-color: #fff3cd !important; color: #856404 !important; }
-        
+
         .fg-btn-selected.fg-btn-functional_group { background-color: #007bff !important; color: white !important; }
         .fg-btn-selected.fg-btn-cyclic { background-color: #6c757d !important; color: white !important; }
         .fg-btn-selected.fg-btn-biological { background-color: #28a745 !important; color: white !important; }
         .fg-btn-selected.fg-btn-overshadowed { background-color: #ffc107 !important; color: white !important; }
-        
+
         .fg-toggle-btn {
             background-color: #6c757d !important;
             color: white !important;
@@ -121,21 +123,22 @@ def display_functional_groups(mol: Chem.Mol, show_overshadowed: bool = False):
     def update_molecule_display():
         with mol_output:
             clear_output(wait=True)
-            
+
             # Use fixed size SVG for stable alignment
             width, height = 550, 450
             drawer = rdMolDraw2D.MolDraw2DSVG(width, height)
-            
+
             if state["selected_idx"] is not None:
                 row = all_df.iloc[state["selected_idx"]]
                 highlight_atoms = [int(i) for i in row["atom_ids"]]
                 drawer.DrawMolecule(mol, highlightAtoms=highlight_atoms)
             else:
                 drawer.DrawMolecule(mol)
-            
+
             drawer.FinishDrawing()
             svg = drawer.GetDrawingText()
             from IPython.display import SVG
+
             display(SVG(svg))
 
     def refresh_button_styles():
@@ -144,7 +147,7 @@ def display_functional_groups(mol: Chem.Mol, show_overshadowed: bool = False):
             idx = getattr(btn, "_match_idx", None)
             if idx is None:
                 continue
-            
+
             # Update the selected class
             classes = list(btn._dom_classes)
             if state["selected_idx"] == idx:
@@ -159,10 +162,10 @@ def display_functional_groups(mol: Chem.Mol, show_overshadowed: bool = False):
         mask = [True] * len(all_df)
         if not state["show_overshadowed"]:
             mask = ~all_df["is_overshadowed"]
-        
+
         visible_df = all_df[mask]
         state["filtered_indices"] = list(visible_df.index)
-        
+
         buttons = []
         for idx in state["filtered_indices"]:
             row = all_df.iloc[idx]
@@ -171,38 +174,41 @@ def display_functional_groups(mol: Chem.Mol, show_overshadowed: bool = False):
                 layout=widgets.Layout(width="100%", height="35px"),
             )
             # Store the index on the button object for future reference
-            btn._match_idx = idx
+            btn._match_idx = idx  # type: ignore[attr-defined]
             btn.add_class("fg-btn")
-            
+
             # Determine color class
             btn_type = "overshadowed" if row["is_overshadowed"] else row["group"]
             btn.add_class(f"fg-btn-{btn_type}")
-            
+
             # Callback
             def on_click_handler(b, target_idx=idx):
                 state["selected_idx"] = target_idx
                 update_molecule_display()
                 refresh_button_styles()
-            
+
             btn.on_click(on_click_handler)
             buttons.append(btn)
-        
+
         buttons_layout.children = buttons
         refresh_button_styles()
 
         # Ensure toggle button is always at the bottom of the right panel
         if list_container.children[-1] != toggle_btn:
-            list_container.children = list(list_container.children) + [toggle_btn]
+            list_container.children = [*list(list_container.children), toggle_btn]
 
     def on_toggle_clicked(b):
         state["show_overshadowed"] = not state["show_overshadowed"]
         # If current selected is overshadowed and we hide them, reset selection
-        if not state["show_overshadowed"] and state["selected_idx"] is not None:
-            if all_df.iloc[state["selected_idx"]]["is_overshadowed"]:
-                # Try to find first non-overshadowed
-                primary_indices = all_df[~all_df["is_overshadowed"]].index
-                state["selected_idx"] = primary_indices[0] if not primary_indices.empty else None
-        
+        if (
+            not state["show_overshadowed"]
+            and state["selected_idx"] is not None
+            and all_df.iloc[state["selected_idx"]]["is_overshadowed"]
+        ):
+            # Try to find first non-overshadowed
+            primary_indices = all_df[~all_df["is_overshadowed"]].index
+            state["selected_idx"] = primary_indices[0] if not primary_indices.empty else None
+
         update_list_structure()
         update_molecule_display()
 
@@ -215,6 +221,6 @@ def display_functional_groups(mol: Chem.Mol, show_overshadowed: bool = False):
     # Layout
     arrow = widgets.HTML("<div style='font-size: 32px; color: #ccc; margin: auto 40px;'>&rsaquo;</div>")
     main_box = widgets.HBox([mol_output, arrow, list_container], layout=widgets.Layout(align_items="center"))
-    
+
     display(css)
     return main_box

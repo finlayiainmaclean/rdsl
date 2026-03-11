@@ -2421,6 +2421,9 @@ name = "rdsl"
 version = "0.0.1"
 source = { editable = "." }
 dependencies = [
+    { name = "ipython", version = "8.38.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
+    { name = "ipython", version = "9.10.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
+    { name = "ipywidgets" },
     { name = "loguru" },
     { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
     { name = "numpy", version = "2.4.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
@@ -2447,6 +2450,8 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "ipython", specifier = ">=8.0.0" },
+    { name = "ipywidgets", specifier = ">=8.0.0" },
     { name = "loguru", specifier = ">=0.7.3" },
     { name = "numpy", specifier = ">=1.26.0" },
     { name = "pandas", specifier = ">=2.0.0" },
