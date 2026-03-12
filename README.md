@@ -10,6 +10,11 @@ pip install rdsl
 
 ## Usage
 
+### CLI
+```wget https://files.rcsb.org/download/7RPZ.pdb -O /tmp/7RPZ.pdb > /dev/null 2>&1
+rdsl /tmp/7RPZ.pdb /tmp/7RPZ.selected.sdf "resn 6IC"
+```
+
 ### Atom Selection
 
 The `select_atom_ids` function returns a numpy array of indices for atoms matching the expression.
